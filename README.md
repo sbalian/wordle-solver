@@ -2,7 +2,7 @@
 
 
 ```bash
-python -m install -U pip
+python -m pip install -U pip
 pip install -U virtualenv
 
 virtualenv .venv --python=3.10
