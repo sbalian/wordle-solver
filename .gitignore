@@ -1,1 +1,4 @@
 *.ipynb_checkpoints/
+*.pyc
+src/wordle_solver/version.py
+*.egg-info/
