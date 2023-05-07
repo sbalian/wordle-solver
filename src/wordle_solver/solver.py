@@ -64,3 +64,74 @@ class Solver:
             "does_not_contain": dict(does_not_contain),
             "contains_not_at": dict(contains_not_at),
         }
+
+    def find_candidates(
+        self,
+        hint: str,
+        incorrect_positions: set[int] | None = None,
+    ) -> set[str]:
+        """Return possible Wordle solutions given a hint.
+
+        hint is a 5-letter word specification. Use uppercase letters
+        to indicate letters in the correct position (green) and
+        lowercase letters to indicate letters that are either in the
+        incorrect position (orange) or do not exist in the word
+        (dark grey). Use incorrect_positions to indicate the indices
+        in the hint for the letters that exist in the word but are
+        incorrectly positioned (i.e., color letters orange using
+        these indices).
+
+        For example, hint = 'Tseta' and incorrect_positions = set([1, 3])
+        specify that the word starts with a T, contains s and another
+        t but in incorrect positions and does not contain an a.
+        """
+
+        if incorrect_positions is None:
+            incorrect_positions = set()
+
+        if len(hint) != 5:
+            raise ValueError(f"hint: {hint} must be of length 5")
+        if len(incorrect_positions) > 5:
+            raise ValueError("length of incorrect_positions must be at most 5")
+        for incorrect_position in incorrect_positions:
+            if not (0 <= incorrect_position < 5):
+                raise ValueError(
+                    f"incorrect position {incorrect_position} out of bounds"
+                )
+
+        word_sets = []
+        letters_in_incorrect_positions = set(
+            [hint[position] for position in incorrect_positions]
+        )
+        letters_in_correct_positions = set(
+            [
+                hint[position].lower()
+                for position, letter in enumerate(hint)
+                if letter.isupper()
+            ]
+        )
+        for position, letter in enumerate(hint):
+            upper_letter = letter.isupper()
+            position_in_incorrect_positions = position in incorrect_positions
+            if upper_letter and position_in_incorrect_positions:
+                raise ValueError(
+                    "correct letter (upper) position cannot be in "
+                    "incorrect_positions"
+                )
+            elif upper_letter:
+                word_sets.append(
+                    self.lookups["contains_at"][(letter.lower(), position)]
+                )
+            elif position_in_incorrect_positions:
+                word_sets.append(
+                    self.lookups["contains_not_at"][(letter, position)]
+                )
+            elif letter not in letters_in_incorrect_positions.union(
+                letters_in_correct_positions
+            ):
+                word_sets.append(self.lookups["does_not_contain"][letter])
+
+        if len(incorrect_positions) == 5:
+            for letter in ALPHABET - set(hint.lower()):
+                word_sets.append(self.lookups["does_not_contain"][letter])
+        return set.intersection(*word_sets)
