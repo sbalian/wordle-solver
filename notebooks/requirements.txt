@@ -1,4 +1,0 @@
-notebook
-jupyter-black
-pandas
-matplotlib
