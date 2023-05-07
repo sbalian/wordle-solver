@@ -1,5 +1,7 @@
 # Wordle solver
 
+This is work in progress (it is by no means an efficient implementation!).
+
 Clone this repo, navigate to it and use `pip` to install in a virtual
 environment:
 
