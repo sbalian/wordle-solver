@@ -1,11 +1,11 @@
 import random
 
-from .solve import Solver
+from . import solve
 
 
 def game(
     answer: str,
-    solver_: Solver,
+    solver_: solve.Solver,
     seed: int | None = 42,
 ) -> int:
     """Play a game and return the number of guesses to a solution."""
@@ -31,7 +31,7 @@ def all_games() -> list[int]:
     # Not reproducible even with seed, possibly because
     # of the ordering in the sets changing between runs
 
-    solver_ = Solver()
+    solver_ = solve.Solver()
     words = list(solver_.words)
     num_guesses = []
     for word in words:
