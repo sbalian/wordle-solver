@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wordle-solver"
+authors = [{ name = "Seto Balian", email = "seto.balian@gmail.com" }]
+description = "Solve Wordle"
+keywords = ["wordle"]
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+dependencies = []
+dynamic = ["version"]
+maintainers = [{ name = "Seto Balian", email = "seto.balian@gmail.com" }]
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Topic :: Games/Entertainment :: Puzzle Games",
+    "Typing :: Typed",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: Unix",
+    "Operating System :: MacOS",
+    "License :: OSI Approved :: MIT License",
+]
+
+[project.urls]
+homepage = "https://github.com/sbalian/wordle-solver"
+repository = "https://github.com/sbalian/wordle-solver.git"
+
+[tool.setuptools_scm]
+version_scheme = "post-release"
+write_to = "src/wordle_solver/version.py"
+
+[tool.black]
+line-length = 79
+
+[tool.isort]
+profile = "black"
+line_length = 79
+known_first_party = ["wordle_solver"]
+
+[tool.pytest.ini_options]
+addopts = "--verbose"
+testpaths = "tests"
+norecursedirs = ["tests/data"]
+
+[tool.mypy]
+ignore_missing_imports = true
+follow_imports = "silent"
+check_untyped_defs = true
+enable_error_code = ["ignore-without-code"]
+show_error_codes = true
+warn_unused_ignores = false
+exclude = ["__pycache__", ".git", ".tox", "build", ".venv", "dist"]
