@@ -1,45 +1,45 @@
 import pytest
 
-from wordle_solver import solver
+from wordle_solver import solve
 
 
 def test_load_words():
-    words = solver.load_words()
+    words = solve.load_words()
     assert all(len(word) == 5 for word in words)
     assert len(set(words)) == len(words)
     assert all(word.islower() for word in words)
     assert len(words) == 14855
 
 
-def test_solver_words(solver_class):
-    assert solver_class.words == solver.load_words()
+def test_solver_words(solver_):
+    assert solver_.words == solve.load_words()
 
 
-def test_lookups(solver_class):
-    for lookup in solver_class.lookups.values():
-        assert set.union(*(lookup.values())) == set(solver_class.words)
+def test_lookups(solver_):
+    for lookup in solver_.lookups.values():
+        assert set.union(*(lookup.values())) == set(solver_.words)
 
-    assert "apple" in solver_class.lookups["contains_at"][("a", 0)]
-    assert "apple" not in solver_class.lookups["contains_at"][("b", 1)]
+    assert "apple" in solver_.lookups["contains_at"][("a", 0)]
+    assert "apple" not in solver_.lookups["contains_at"][("b", 1)]
 
-    assert "zebra" in solver_class.lookups["does_not_contain"]["q"]
-    assert "zebra" not in solver_class.lookups["does_not_contain"]["z"]
+    assert "zebra" in solver_.lookups["does_not_contain"]["q"]
+    assert "zebra" not in solver_.lookups["does_not_contain"]["z"]
 
-    assert "apple" in solver_class.lookups["contains_not_at"][("a", 1)]
-    assert "apple" not in solver_class.lookups["contains_not_at"][("a", 0)]
-    assert "green" not in solver_class.lookups["contains_not_at"][("a", 0)]
+    assert "apple" in solver_.lookups["contains_not_at"][("a", 1)]
+    assert "apple" not in solver_.lookups["contains_not_at"][("a", 0)]
+    assert "green" not in solver_.lookups["contains_not_at"][("a", 0)]
 
     assert (
-        set(letter for letter, _ in solver_class.lookups["contains_at"])
-        == solver.ALPHABET
+        set(letter for letter, _ in solver_.lookups["contains_at"])
+        == solve.ALPHABET
     )
     assert (
-        set(letter for letter in solver_class.lookups["does_not_contain"])
-        == solver.ALPHABET
+        set(letter for letter in solver_.lookups["does_not_contain"])
+        == solve.ALPHABET
     )
     assert (
-        set(letter for letter, _ in solver_class.lookups["contains_not_at"])
-        == solver.ALPHABET
+        set(letter for letter, _ in solver_.lookups["contains_not_at"])
+        == solve.ALPHABET
     )
 
 
@@ -90,10 +90,10 @@ def test_lookups(solver_class):
     ],
 )
 def test_find_candidates(
-    test_hint, test_incorrect_positions, expected, solver_class
+    test_hint, test_incorrect_positions, expected, solver_
 ):
     assert (
-        solver_class.find_candidates(
+        solver_.find_candidates(
             test_hint, incorrect_positions=test_incorrect_positions
         )
         == expected
@@ -109,5 +109,5 @@ def test_find_candidates(
         ("eplap", "apple", ("ePlap", set([0, 2, 3, 4]))),
     ],
 )
-def test_give_hint(test_guess, test_answer, expected, solver_class):
-    assert solver_class.give_hint(test_guess, test_answer) == expected
+def test_give_hint(test_guess, test_answer, expected, solver_):
+    assert solver_.give_hint(test_guess, test_answer) == expected

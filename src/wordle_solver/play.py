@@ -1,6 +1,6 @@
 import random
 
-from .solver import Solver
+from .solve import Solver
 
 
 def game(
