@@ -210,8 +210,7 @@ class Solver:
         # Not reproducible even with seed, possibly because
         # of the ordering in the sets changing between runs
         with concurrent.futures.ProcessPoolExecutor() as executor:
-            guesses = [
+            return [
                 num_guesses
                 for num_guesses in executor.map(self.game, self.words)
             ]
-        return guesses
