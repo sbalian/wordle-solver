@@ -1,8 +1,8 @@
-from . import analysis, play
+from . import analysis, solve
 
 
 def main():
     """Play all Worldes and print statistics."""
 
-    num_guesses = play.all_games()
+    num_guesses = solve.Solver().play()
     analysis.print_stats(num_guesses)

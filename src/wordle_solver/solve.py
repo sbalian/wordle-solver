@@ -1,5 +1,8 @@
 import collections
+import concurrent.futures
+import functools
 import pathlib
+import random
 import string
 from typing import TypedDict
 
@@ -180,3 +183,39 @@ class Solver:
             else:
                 hint += guess[i]
         return hint, incorrect_positions
+
+    def game(
+        self,
+        answer: str,
+        seed: int | None = 42,
+    ) -> int:
+        """Play a game and return the number of guesses to a solution."""
+
+        random.seed(seed)
+        num_guesses = 0
+        candidates = set(self.words)
+        hint = ""
+        while hint.lower() != answer:
+            guess = random.choice(list(candidates))
+            num_guesses += 1
+            hint, incorrect_positions = self.give_hint(guess, answer)
+            candidates.remove(guess)
+            candidates.intersection_update(
+                self.find_candidates(hint, incorrect_positions)
+            )
+        return num_guesses
+
+    def play(self) -> list[int]:
+        """Play all Worldes and return the number of guesses."""
+
+        # Not reproducible even with seed, possibly because
+        # of the ordering in the sets changing between runs
+
+        words = list(self.words)
+        num_guesses = []
+
+        game_ = functools.partial(self.game, seed=42)
+
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            num_guesses = list(executor.map(game_, words, chunksize=1000))
+        return num_guesses
