@@ -1,4 +1,5 @@
 import collections
+import concurrent.futures
 import copy
 import pathlib
 import random
@@ -8,8 +9,6 @@ from typing import TypedDict
 import pkg_resources
 
 ALPHABET = set(string.ascii_lowercase)
-
-import concurrent.futures
 
 
 def load_words() -> list[str]:
