@@ -1,5 +1,7 @@
 import collections
+import copy
 import pathlib
+import random
 import string
 from typing import TypedDict
 
@@ -180,3 +182,24 @@ class Solver:
             else:
                 hint += guess[i]
         return hint, incorrect_positions
+
+    def game(
+        self,
+        answer: str,
+        seed: int | None = 42,
+    ) -> int:
+        """Play a game and return the number of guesses to a solution."""
+
+        random.seed(seed)
+        num_guesses = 0
+        candidates = copy.copy(self.words)
+        hint = ""
+        while hint.lower() != answer:
+            guess = random.choice(list(candidates))
+            num_guesses += 1
+            hint, incorrect_positions = self.give_hint(guess, answer)
+            candidates.remove(guess)
+            candidates.intersection_update(
+                self.find_candidates(hint, incorrect_positions)
+            )
+        return num_guesses
