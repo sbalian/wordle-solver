@@ -196,7 +196,9 @@ class Solver:
         candidates = set(self.words)
         hint = ""
         while hint.lower() != answer:
-            guess = random.choice(list(candidates))
+            # This sorting is inefficient but guarantees reproducibility
+            # (roughly doubles Solver.play running time)
+            guess = random.choice(sorted(list(candidates)))
             num_guesses += 1
             hint, incorrect_positions = self.give_hint(guess, answer)
             candidates.remove(guess)
@@ -207,9 +209,6 @@ class Solver:
 
     def play(self) -> list[int]:
         """Play all Worldes and return the number of guesses."""
-
-        # Not reproducible even with seed, possibly because
-        # of the ordering in the sets changing between runs
 
         words = list(self.words)
         num_guesses = []
