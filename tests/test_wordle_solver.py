@@ -12,12 +12,12 @@ def test_load_words():
 
 
 def test_solver_words(solver_class):
-    assert solver_class.words == set(solver.load_words())
+    assert solver_class.words == solver.load_words()
 
 
 def test_lookups(solver_class):
     for lookup in solver_class.lookups.values():
-        assert set.union(*(lookup.values())) == solver_class.words
+        assert set.union(*(lookup.values())) == set(solver_class.words)
 
     assert "apple" in solver_class.lookups["contains_at"][("a", 0)]
     assert "apple" not in solver_class.lookups["contains_at"][("b", 1)]
