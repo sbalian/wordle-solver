@@ -135,3 +135,48 @@ class Solver:
             for letter in ALPHABET - set(hint.lower()):
                 word_sets.append(self.lookups["does_not_contain"][letter])
         return set.intersection(*word_sets)
+
+    @staticmethod
+    def give_hint(guess: str, answer: str) -> tuple[str, set[int]]:
+        """Get a hint and incorrect letter positions for a guess and answer."""
+
+        guess = guess.lower()
+        answer = answer.lower()
+
+        if len(guess) != 5:
+            raise ValueError("guess must be of length 5")
+        if len(answer) != 5:
+            raise ValueError("answer must be of length 5")
+        if not guess.isalpha():
+            raise ValueError("guess must be alphabetic")
+        if not answer.isalpha():
+            raise ValueError("answer must be alphabetic")
+
+        answer_positions = list(range(5))
+        correct_positions = set([])
+        incorrect_positions = set([])
+
+        for guess_position, guess_letter in enumerate(guess):
+            if answer[guess_position] == guess_letter:
+                answer_positions.remove(guess_position)
+                correct_positions.add(guess_position)
+
+        for guess_position, guess_letter in enumerate(guess):
+            if guess_position in correct_positions:
+                continue
+            found_orange = False
+            for answer_position in answer_positions:
+                if answer[answer_position] == guess_letter:
+                    found_orange = True
+                    break
+            if found_orange:
+                incorrect_positions.add(guess_position)
+                answer_positions.remove(answer_position)
+
+        hint = ""
+        for i in range(5):
+            if i in correct_positions:
+                hint += guess[i].upper()
+            else:
+                hint += guess[i]
+        return hint, incorrect_positions

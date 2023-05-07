@@ -98,3 +98,16 @@ def test_find_candidates(
         )
         == expected
     )
+
+
+@pytest.mark.parametrize(
+    "test_guess,test_answer,expected",
+    [
+        ("speak", "stays", ("Speak", set([3]))),
+        ("speak", "speak", ("SPEAK", set([]))),
+        ("leapp", "apple", ("leapp", set([0, 1, 2, 3, 4]))),
+        ("eplap", "apple", ("ePlap", set([0, 2, 3, 4]))),
+    ],
+)
+def test_give_hint(test_guess, test_answer, expected, solver_class):
+    assert solver_class.give_hint(test_guess, test_answer) == expected
