@@ -1,8 +1,5 @@
 import collections
-import concurrent.futures
-import copy
 import pathlib
-import random
 import string
 from typing import TypedDict
 
@@ -33,7 +30,7 @@ class Lookups(TypedDict):
 
 class Solver:
     def __init__(self) -> None:
-        self.words = set(load_words())
+        self.words = load_words()
         self.lookups = self.build_lookups()
 
     def build_lookups(self) -> Lookups:
@@ -183,34 +180,3 @@ class Solver:
             else:
                 hint += guess[i]
         return hint, incorrect_positions
-
-    def game(
-        self,
-        answer: str,
-        seed: int | None = 42,
-    ) -> int:
-        """Play a game and return the number of guesses to a solution."""
-
-        random.seed(seed)
-        num_guesses = 0
-        candidates = copy.copy(self.words)
-        hint = ""
-        while hint.lower() != answer:
-            guess = random.choice(list(candidates))
-            num_guesses += 1
-            hint, incorrect_positions = self.give_hint(guess, answer)
-            candidates.remove(guess)
-            candidates.intersection_update(
-                self.find_candidates(hint, incorrect_positions)
-            )
-        return num_guesses
-
-    def play(self) -> list[int]:
-        """Play all Worldes, returning the number of guesses."""
-        # Not reproducible even with seed, possibly because
-        # of the ordering in the sets changing between runs
-        with concurrent.futures.ProcessPoolExecutor() as executor:
-            return [
-                num_guesses
-                for num_guesses in executor.map(self.game, self.words)
-            ]
