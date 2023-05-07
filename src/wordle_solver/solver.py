@@ -9,6 +9,8 @@ import pkg_resources
 
 ALPHABET = set(string.ascii_lowercase)
 
+import concurrent.futures
+
 
 def load_words() -> list[str]:
     """Read possible guesses (source: https://gist.github.com/cfreshman)."""
@@ -203,3 +205,14 @@ class Solver:
                 self.find_candidates(hint, incorrect_positions)
             )
         return num_guesses
+
+    def play(self) -> list[int]:
+        """Play all Worldes, returning the number of guesses."""
+        # Not reproducible even with seed, possibly because
+        # of the ordering in the sets changing between runs
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            guesses = [
+                num_guesses
+                for num_guesses in executor.map(self.game, self.words)
+            ]
+        return guesses
