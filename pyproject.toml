@@ -28,6 +28,9 @@ classifiers = [
 homepage = "https://github.com/sbalian/wordle-solver"
 repository = "https://github.com/sbalian/wordle-solver.git"
 
+[project.scripts]
+wordle-solver = "wordle_solver.cli:main"
+
 [tool.setuptools.package-data]
 wordle_solver = ["wordle-nyt-words-14855.txt"]
 
