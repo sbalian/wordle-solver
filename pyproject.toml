@@ -28,6 +28,9 @@ classifiers = [
 homepage = "https://github.com/sbalian/wordle-solver"
 repository = "https://github.com/sbalian/wordle-solver.git"
 
+[tool.setuptools.package-data]
+wordle_solver = ["wordle-nyt-words-14855.txt"]
+
 [tool.setuptools_scm]
 version_scheme = "post-release"
 write_to = "src/wordle_solver/version.py"
