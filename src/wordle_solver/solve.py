@@ -127,13 +127,24 @@ class Solver:
             if letter.isupper() or position in incorrect_positions:
                 letters_in_answer.add(letter.lower())
 
+        correct_positions = set([])
         for position, letter in enumerate(hint):
             if letter.isupper():
                 word_sets.append(self._contains_at[(letter.lower(), position)])
+                correct_positions.add(position)
             elif position in incorrect_positions:
                 word_sets.append(self._contains_not_at[(letter, position)])
             elif letter not in letters_in_answer:
                 word_sets.append(self._not_contains[letter])
+
+        for incorrect_position in incorrect_positions:
+            for correct_positon in correct_positions:
+                if hint[incorrect_position] != hint[correct_positon].lower():
+                    word_sets.append(
+                        self._contains_not_at[
+                            (hint[incorrect_position], correct_positon)
+                        ]
+                    )
 
         if len(incorrect_positions) == 5:
             for letter in self._alphabet - set(hint.lower()):
