@@ -184,51 +184,25 @@ class Solver:
             if answer not in self._words:
                 raise ValueError(f"answer '{answer}' is not an allowed word")
 
-        correct_guess_positions: set[int] = set()
-        guess_letters_not_in_answer: set[str] = set()
-        guess_positions_not_in_answer: set[int] = set()
-        possible_incorrect_guess_positions_by_letter: DefaultDict[
-            str, list[int]
-        ] = collections.defaultdict(list)
-
+        answer_letter_counts = collections.defaultdict(
+            int, collections.Counter(answer)
+        )
+        correct_positions: set[int] = set()
+        incorrect_positions: set[int] = set()
         for guess_position, guess_letter in enumerate(guess):
             if answer[guess_position] == guess_letter:
-                correct_guess_positions.add(guess_position)
-            elif guess_letter not in answer:
-                guess_letters_not_in_answer.add(guess_letter)
-                guess_positions_not_in_answer.add(guess_position)
-            else:
-                possible_incorrect_guess_positions_by_letter[
-                    guess_letter
-                ].append(guess_position)
-
-        answer_without_matched_letters: list[str] = []
-        for position, letter in enumerate(answer):
-            if position not in correct_guess_positions:
-                answer_without_matched_letters.append(letter)
-
-        answer_without_matched_letters_counts = collections.Counter(
-            answer_without_matched_letters
-        )
-
-        for letter in possible_incorrect_guess_positions_by_letter.keys():
-            while (
-                len(possible_incorrect_guess_positions_by_letter[letter])
-                > answer_without_matched_letters_counts[letter]
-            ):
-                possible_incorrect_guess_positions_by_letter[letter].pop(-1)
-
+                answer_letter_counts[guess_letter] -= 1
+                correct_positions.add(guess_position)
         hint = ""
         for guess_position, guess_letter in enumerate(guess):
-            if guess_position in correct_guess_positions:
+            if guess_position in correct_positions:
                 hint += guess_letter.upper()
+            elif answer_letter_counts[guess_letter] > 0:
+                answer_letter_counts[guess_letter] -= 1
+                incorrect_positions.add(guess_position)
+                hint += guess_letter
             else:
                 hint += guess_letter
-
-        incorrect_positions: set[int] = set()
-        for positions in possible_incorrect_guess_positions_by_letter.values():
-            for position in positions:
-                incorrect_positions.add(position)
 
         return hint, incorrect_positions
 

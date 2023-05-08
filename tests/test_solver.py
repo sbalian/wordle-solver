@@ -108,6 +108,8 @@ def test_possible_answers(
         ("aabbc", "bbaac", ("aabbC", set([0, 1, 2, 3]))),
         ("bbbdd", "aaabb", ("bbbdd", set([0, 1]))),
         ("bbbdb", "aaabb", ("bbbdB", set([0]))),
+        ("babbb", "bbaaa", ("Babbb", set([1, 2]))),
+        ("bbbaa", "aaabb", ("bbbaa", set([0, 1, 3, 4]))),
     ],
 )
 def test_give_hint(test_guess, test_answer, expected, solver_):
