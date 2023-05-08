@@ -1,8 +1,8 @@
 import pytest
 
-from wordle_solver import solve
+import wordle_solver
 
 
 @pytest.fixture
 def solver_():
-    return solve.Solver()
+    return wordle_solver.Solver()
