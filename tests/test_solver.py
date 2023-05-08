@@ -105,6 +105,9 @@ def test_possible_answers(
         ("speak", "speak", ("SPEAK", set([]))),
         ("leapp", "apple", ("leapp", set([0, 1, 2, 3, 4]))),
         ("eplap", "apple", ("ePlap", set([0, 2, 3, 4]))),
+        ("aabbc", "bbaac", ("aabbC", set([0, 1, 2, 3]))),
+        ("bbbdd", "aaabb", ("bbbdd", set([0, 1]))),
+        ("bbbdb", "aaabb", ("bbbdB", set([0]))),
     ],
 )
 def test_give_hint(test_guess, test_answer, expected, solver_):

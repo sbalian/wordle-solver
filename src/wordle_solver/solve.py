@@ -184,33 +184,52 @@ class Solver:
             if answer not in self._words:
                 raise ValueError(f"answer '{answer}' is not an allowed word")
 
-        answer_positions = list(range(5))
-        correct_positions = set([])
-        incorrect_positions = set([])
+        correct_guess_positions: set[int] = set()
+        guess_letters_not_in_answer: set[str] = set()
+        guess_positions_not_in_answer: set[int] = set()
+        possible_incorrect_guess_positions_by_letter: DefaultDict[
+            str, list[int]
+        ] = collections.defaultdict(list)
 
         for guess_position, guess_letter in enumerate(guess):
             if answer[guess_position] == guess_letter:
-                answer_positions.remove(guess_position)
-                correct_positions.add(guess_position)
+                correct_guess_positions.add(guess_position)
+            elif guess_letter not in answer:
+                guess_letters_not_in_answer.add(guess_letter)
+                guess_positions_not_in_answer.add(guess_position)
+            else:
+                possible_incorrect_guess_positions_by_letter[
+                    guess_letter
+                ].append(guess_position)
 
-        for guess_position, guess_letter in enumerate(guess):
-            if guess_position in correct_positions:
-                continue
-            found_orange = False
-            for answer_position in answer_positions:
-                if answer[answer_position] == guess_letter:
-                    found_orange = True
-                    break
-            if found_orange:
-                incorrect_positions.add(guess_position)
-                answer_positions.remove(answer_position)
+        answer_without_matched_letters: list[str] = []
+        for position, letter in enumerate(answer):
+            if position not in correct_guess_positions:
+                answer_without_matched_letters.append(letter)
+
+        answer_without_matched_letters_counts = collections.Counter(
+            answer_without_matched_letters
+        )
+
+        for letter in possible_incorrect_guess_positions_by_letter.keys():
+            while (
+                len(possible_incorrect_guess_positions_by_letter[letter])
+                > answer_without_matched_letters_counts[letter]
+            ):
+                possible_incorrect_guess_positions_by_letter[letter].pop(-1)
 
         hint = ""
-        for i in range(5):
-            if i in correct_positions:
-                hint += guess[i].upper()
+        for guess_position, guess_letter in enumerate(guess):
+            if guess_position in correct_guess_positions:
+                hint += guess_letter.upper()
             else:
-                hint += guess[i]
+                hint += guess_letter
+
+        incorrect_positions: set[int] = set()
+        for positions in possible_incorrect_guess_positions_by_letter.values():
+            for position in positions:
+                incorrect_positions.add(position)
+
         return hint, incorrect_positions
 
     def play(
