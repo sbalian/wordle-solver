@@ -260,9 +260,13 @@ class Solver:
         candidates = set(self._words)
         hint = ""
         while hint.lower() != answer:
-            # This sorting is inefficient but guarantees reproducibility
-            # (roughly doubles Solver.play running time)
-            guess = random.choice(sorted(list(candidates)))
+            if seed is not None:
+                # This sorting is inefficient but guarantees reproducibility
+                # (roughly doubles Solver.play running time)
+                guess = random.choice(sorted(list(candidates)))
+            else:
+                guess = random.choice(list(candidates))
+
             num_guesses += 1
             hint, incorrect_positions = self.give_hint(guess, answer)
             candidates.remove(guess)
