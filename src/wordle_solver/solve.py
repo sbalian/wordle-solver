@@ -122,31 +122,23 @@ class Solver:
         # The output will be the intersection of these sets
         word_sets: list[set[str]] = []
 
-        letters_in_incorrect_positions = set(
-            [hint[position] for position in incorrect_positions]
-        )
-        letters_in_correct_positions = set(
-            [
-                hint[position].lower()
-                for position, letter in enumerate(hint)
-                if letter.isupper()
-            ]
-        )
+        letters_in_answer: set[str] = set()
         for position, letter in enumerate(hint):
-            upper_letter = letter.isupper()
-            position_in_incorrect_positions = position in incorrect_positions
-            if upper_letter:
+            if letter.isupper() or position in incorrect_positions:
+                letters_in_answer.add(letter.lower())
+
+        for position, letter in enumerate(hint):
+            if letter.isupper():
                 word_sets.append(self._contains_at[(letter.lower(), position)])
-            elif position_in_incorrect_positions:
+            elif position in incorrect_positions:
                 word_sets.append(self._contains_not_at[(letter, position)])
-            elif letter not in letters_in_incorrect_positions.union(
-                letters_in_correct_positions
-            ):
+            elif letter not in letters_in_answer:
                 word_sets.append(self._not_contains[letter])
 
         if len(incorrect_positions) == 5:
             for letter in self._alphabet - set(hint.lower()):
                 word_sets.append(self._not_contains[letter])
+
         return set.intersection(*word_sets)
 
     def give_hint(
