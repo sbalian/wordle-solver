@@ -246,8 +246,9 @@ class Solver:
         answer : str
             The answer.
         seed : int or None, optional
-            The seed passed to random.seed (used for randomly choosing
-            from possible candidates). Defaults to 42.
+            The seed passed to random.seed if not None (used for
+            reproducibility in randomly choosing from possible
+            candidates). Defaults to 42.
 
         Returns
         -------
@@ -262,14 +263,14 @@ class Solver:
         while hint.lower() != answer:
             if seed is not None:
                 # This sorting is inefficient but guarantees reproducibility
-                # (roughly doubles Solver.play running time)
+                # (roughly doubles Solver.play_all running time)
                 guess = random.choice(sorted(list(candidates)))
+                candidates.remove(guess)
             else:
-                guess = random.choice(list(candidates))
+                guess = candidates.pop()
 
             num_guesses += 1
             hint, incorrect_positions = self.give_hint(guess, answer)
-            candidates.remove(guess)
             candidates.intersection_update(
                 self.possible_answers(hint, incorrect_positions)
             )
@@ -286,8 +287,9 @@ class Solver:
         Parameters
         ----------
         seed : int or None, optional
-            The seed passed to random.seed (used for randomly choosing
-            from possible candidates). Defaults to 42.
+            The seed passed to random.seed if not None (used for
+            reproducibility in randomly choosing from possible
+            candidates). Defaults to 42.
         chunksize : int
             Passed to concurrent.futures.ProcessPoolExecutor.map (default
             1000). Change this if the function runs for too long.
