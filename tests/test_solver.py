@@ -2,6 +2,8 @@ import pytest
 
 from wordle_solver import solve
 
+# TODO increase coverage
+
 
 def test_load_words():
     words = solve._load_words()
