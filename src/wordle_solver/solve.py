@@ -63,7 +63,7 @@ def hint_score(
     incorrect_positions : set of int, optional
         Indicies of correct letters but in the incorrect positions (see
         Solver.give_hint for more). The default is 0.5 (i.e., orange is worth
-        half as green).
+        half as much as green).
 
     Returns
     -------
