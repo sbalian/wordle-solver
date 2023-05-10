@@ -27,29 +27,30 @@ You should see something like this:
 
 ```text
 Number of games played: 14855
-Average number of guesses to a correct solution: 5.30
+Average number of guesses to a correct solution: 4.97
 Number of guesses distribution (%):
 1: 0.01
-2: 0.96
-3: 8.63
-4: 23.63
-5: 27.87
-6: 20.19
-7: 10.18
-8: 4.55
-9: 2.11
-10: 1.01
-11: 0.50
-12: 0.24
-13: 0.10
-14: 0.02
-Games won (up to 6 guesses): 81.29 %
-wordle-solver  67.62s user 0.64s system 1220% cpu 5.592 total
+2: 1.43
+3: 14.29
+4: 31.20
+5: 24.25
+6: 13.29
+7: 7.28
+8: 3.81
+9: 2.05
+10: 1.16
+11: 0.65
+12: 0.32
+13: 0.15
+14: 0.07
+15: 0.03
+Games won (up to 6 guesses): 84.47 %
+wordle-solver  108.89s user 2.09s system 1031% cpu 10.764 total
 ```
 
 To run the tests locally:
 
 ```bash
 pip install -U tox
-tox
+tox -r
 ```

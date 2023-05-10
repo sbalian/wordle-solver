@@ -1,10 +1,13 @@
 import collections
 import concurrent.futures
 import functools
-import random
+import json
+import statistics
 import string
 from importlib import resources
 from typing import DefaultDict
+
+import tqdm
 
 
 def _load_words() -> list[str]:
@@ -14,13 +17,63 @@ def _load_words() -> list[str]:
 
     Returns
     -------
-    list of str:
+    list of str
         A list of allowed Wordle words.
     """
 
     return resources.read_text(
         "wordle_solver", "wordle-nyt-words-14855.txt"
     ).splitlines()
+
+
+def load_sorted_scores() -> dict[str, float]:
+    """Load word scores (generate using wordle-solver-scores).
+
+    Returns
+    -------
+    dict of {str : float}
+        Scores for all allowed Wordle words (sorted).
+    """
+
+    scores = json.loads(resources.read_text("wordle_solver", "scores.json"))
+    sorted_scores = {
+        word: score
+        for word, score in sorted(
+            scores.items(), key=lambda item: item[1], reverse=True
+        )
+    }
+    return sorted_scores
+
+
+def hint_score(
+    hint: str,
+    incorrect_positions: set[int],
+    incorrect_position_points: float = 0.5,
+) -> float:
+    """Score a hint.
+
+    Each correct letter is worth 1 point and each incorrectly positioned
+    letter is `incorrect_position_points` point(s).
+
+    Parameters
+    ----------
+    hint : str
+        The hint string (see Solver.give_hint for more). Uppercase letters
+        indicate correct letters in the correct positions.
+    incorrect_positions : set of int, optional
+        Indicies of correct letters but in the incorrect positions (see
+        Solver.give_hint for more). The default is 0.5 (i.e., orange is worth
+        half as green).
+
+    Returns
+    -------
+    float
+        The score (sum of points).
+    """
+
+    return float(
+        len([h for h in hint if h.isupper()])
+    ) + incorrect_position_points * len(incorrect_positions)
 
 
 class Solver:
@@ -30,6 +83,7 @@ class Solver:
         """Solve Wordles using lookup tables from a list of 5-letter words."""
 
         self._words: list[str] = _load_words()
+        self._sorted_scores: dict[str, float] = load_sorted_scores()
 
         # Iterate over the words and build lookups
 
@@ -87,7 +141,7 @@ class Solver:
 
         Returns
         -------
-        set of str:
+        set of str
             Possible answers.
 
         Raises
@@ -209,11 +263,7 @@ class Solver:
 
         return hint, incorrect_positions
 
-    def play(
-        self,
-        answer: str,
-        seed: int | None = 42,
-    ) -> int:
+    def play(self, answer: str) -> int:
         """Play a game and return the number of guesses to the solution.
 
         Always finds the answer.
@@ -222,10 +272,6 @@ class Solver:
         ----------
         answer : str
             The answer.
-        seed : int or None, optional
-            The seed passed to random.seed if not None (used for
-            reproducibility in randomly choosing from possible
-            candidates). Defaults to 42.
 
         Returns
         -------
@@ -233,18 +279,14 @@ class Solver:
             Number of guesses to the solution.
         """
 
-        random.seed(seed)
         num_guesses = 0
         candidates = set(self._words)
         hint = ""
         while hint.lower() != answer:
-            if seed is not None:
-                # This sorting is inefficient but guarantees reproducibility
-                # (roughly doubles Solver.play_all running time)
-                guess = random.choice(sorted(list(candidates)))
-                candidates.remove(guess)
-            else:
-                guess = candidates.pop()
+            guess = [
+                word for word in self._sorted_scores if word in candidates
+            ][0]
+            candidates.remove(guess)
 
             num_guesses += 1
             hint, incorrect_positions = self.give_hint(guess, answer)
@@ -253,9 +295,7 @@ class Solver:
             )
         return num_guesses
 
-    def play_all(
-        self, seed: int | None = 42, chunksize: int = 1000
-    ) -> list[int]:
+    def play_all(self, chunksize: int = 100) -> list[int]:
         """Play all Wordles and return the number of guesses to the solutions.
 
         Calls Solver.play on all words and runs in parallel using
@@ -263,13 +303,9 @@ class Solver:
 
         Parameters
         ----------
-        seed : int or None, optional
-            The seed passed to random.seed if not None (used for
-            reproducibility in randomly choosing from possible
-            candidates). Defaults to 42.
-        chunksize : int
+        chunksize : int, optional
             Passed to concurrent.futures.ProcessPoolExecutor.map (default
-            1000). Change this if the function runs for too long.
+            100). Change this if the function runs for too long.
             On Intel Core i7-12700H with 20 cores and 32 GB of RAM, it takes
             about 10 seconds to play all Wordles.
 
@@ -282,8 +318,66 @@ class Solver:
         words = list(self._words)
         num_guesses = []
 
-        game = functools.partial(self.play, seed=seed)
+        game = functools.partial(self.play)
 
         with concurrent.futures.ProcessPoolExecutor() as executor:
-            num_guesses = list(executor.map(game, words, chunksize=chunksize))
+            num_guesses = list(
+                tqdm.tqdm(
+                    executor.map(game, words, chunksize=chunksize),
+                    total=len(words),
+                )
+            )
         return num_guesses
+
+    def hint_scores(self, word: str) -> list[float]:
+        """Calculate all hint scores for a word.
+
+        Parameters
+        ----------
+        word : str
+
+        Returns
+        -------
+        list of float
+            Hint scores for `word`.
+        """
+
+        scores = []
+        for answer in self._words:
+            if word != answer:
+                hint, incorrect_positions = self.give_hint(word, answer)
+                score = hint_score(hint, incorrect_positions)
+                scores.append(score)
+        return scores
+
+    def average_hint_scores(self, chunksize: int = 100) -> dict[str, float]:
+        """Calculate average hint scores for all words.
+
+        Parameters
+        ----------
+        chunksize : int, optional
+            Passed to concurrent.futures.ProcessPoolExecutor.map (default
+            100). Change this if the function runs for too long.
+
+        Returns
+        -------
+        dict of {str : float}
+            Average hint scores for all words.
+        """
+
+        average_scores: dict[str, float] = {}
+
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            for word, scores in list(
+                tqdm.tqdm(
+                    zip(
+                        self._words,
+                        executor.map(
+                            self.hint_scores, self._words, chunksize=chunksize
+                        ),
+                    ),
+                    total=len(self._words),
+                )
+            ):
+                average_scores[word] = statistics.mean(scores)
+        return average_scores

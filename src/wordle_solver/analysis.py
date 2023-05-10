@@ -1,6 +1,8 @@
 import collections
 import statistics
 
+from . import solve
+
 
 def print_stats(num_guesses: list[int]) -> None:
     """Print statistics given number of guesses to solutions.
@@ -29,3 +31,21 @@ def print_stats(num_guesses: list[int]) -> None:
 
     perc_games_won = sum([ng < 7 for ng in num_guesses]) / num_games * 100
     print(f"Games won (up to 6 guesses): {perc_games_won:.2f} %")
+
+
+def print_top_scores(limit: int = 10) -> None:
+    """Print the top scores.
+
+    Parameters
+    ----------
+    limit : int
+        Print the top `limit` (default top 10).
+    """
+
+    scores = solve.load_sorted_scores()
+    printed = 0
+    for word, score in scores.items():
+        if printed == limit:
+            break
+        print(word, score)
+        printed += 1

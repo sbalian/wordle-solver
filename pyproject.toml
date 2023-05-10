@@ -10,7 +10,7 @@ keywords = ["wordle"]
 readme = "README.md"
 requires-python = ">=3.10"
 license = {file = "LICENSE"}
-dependencies = []
+dependencies = ["tqdm"]
 dynamic = ["version"]
 maintainers = [{ name = "Seto Balian", email = "seto.balian@gmail.com" }]
 classifiers = [
@@ -29,10 +29,11 @@ homepage = "https://github.com/sbalian/wordle-solver"
 repository = "https://github.com/sbalian/wordle-solver.git"
 
 [project.scripts]
-wordle-solver = "wordle_solver.cli:main"
+wordle-solver = "wordle_solver.cli:play_all"
+wordle-solver-scores = "wordle_solver.cli:average_scores"
 
 [tool.setuptools.package-data]
-wordle_solver = ["wordle-nyt-words-14855.txt"]
+wordle_solver = ["wordle-nyt-words-14855.txt", "scores.json"]
 
 [tool.setuptools_scm]
 version_scheme = "post-release"
