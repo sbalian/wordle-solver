@@ -332,8 +332,8 @@ class Solver:
             )
         return num_guesses
 
-    def hint_scores(self, word: str) -> list[float]:
-        """Calculate all hint scores for a word.
+    def average_hint_score(self, word: str) -> float:
+        """Calculate the average hint score for a word.
 
         Parameters
         ----------
@@ -341,8 +341,8 @@ class Solver:
 
         Returns
         -------
-        list of float
-            Hint scores for `word`.
+        float
+            Average hint score for `word`.
         """
 
         scores = []
@@ -351,10 +351,10 @@ class Solver:
                 hint, incorrect_positions = self.give_hint(word, answer)
                 score = hint_score(hint, incorrect_positions)
                 scores.append(score)
-        return scores
+        return statistics.mean(scores)
 
     def average_hint_scores(self, chunksize: int = 100) -> dict[str, float]:
-        """Calculate average hint scores for all words.
+        """Calculate the average hint scores for all words.
 
         Parameters
         ----------
@@ -371,16 +371,18 @@ class Solver:
         average_scores: dict[str, float] = {}
 
         with concurrent.futures.ProcessPoolExecutor() as executor:
-            for word, scores in list(
+            for word, score in list(
                 tqdm.tqdm(
                     zip(
                         self._words,
                         executor.map(
-                            self.hint_scores, self._words, chunksize=chunksize
+                            self.average_hint_score,
+                            self._words,
+                            chunksize=chunksize,
                         ),
                     ),
                     total=len(self._words),
                 )
             ):
-                average_scores[word] = statistics.mean(scores)
+                average_scores[word] = score
         return average_scores
