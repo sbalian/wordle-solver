@@ -32,7 +32,8 @@ def load_sorted_scores() -> dict[str, float]:
     Returns
     -------
     dict of {str : float}
-        Scores for all allowed Wordle words (sorted).
+        Scores for all allowed Wordle words (sorted in decreasing
+        order of score).
     """
 
     scores = json.loads(resources.read_text("wordle_solver", "scores.json"))
