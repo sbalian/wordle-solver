@@ -45,7 +45,7 @@ Number of guesses distribution (%):
 14: 0.07
 15: 0.03
 Games won (up to 6 guesses): 84.47 %
-wordle-solver  108.89s user 2.09s system 1031% cpu 10.764 total
+wordle-solver  50.02s user 1.83s system 738% cpu 7.020 total
 ```
 
 To run the tests locally:

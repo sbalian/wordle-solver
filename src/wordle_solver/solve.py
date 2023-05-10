@@ -283,9 +283,11 @@ class Solver:
         candidates = set(self._words)
         hint = ""
         while hint.lower() != answer:
-            guess = [
-                word for word in self._sorted_scores if word in candidates
-            ][0]
+            # Choose the word with the highest score
+            for word in self._sorted_scores:
+                if word in candidates:
+                    guess = word
+                    break
             candidates.remove(guess)
 
             num_guesses += 1
